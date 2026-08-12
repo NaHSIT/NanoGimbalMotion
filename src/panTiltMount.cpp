@@ -199,8 +199,8 @@ void applyTargets() {
 
 // 单独更新水平轴绝对角度目标，不覆盖另外两个轴已有目标。
 void setPanTarget(float degrees) {
-    // 将水平角度转换为整数目标步数并写入 targets[0]。
-    targets[0] = lroundf(panToSteps(degrees));
+    // 叠加当前云台独立的水平零点偏移，再转换为整数目标步数。
+    targets[0] = lroundf(panToSteps(degrees + PAN_ANGLE_OFFSET_DEGREES));
 
     // 重新提交包含三个轴当前目标值的目标数组。
     applyTargets();
@@ -208,8 +208,8 @@ void setPanTarget(float degrees) {
 
 // 单独更新俯仰轴绝对角度目标，不覆盖另外两个轴已有目标。
 void setTiltTarget(float degrees) {
-    // 将俯仰角度转换为整数目标步数并写入 targets[1]。
-    targets[1] = lroundf(tiltToSteps(degrees));
+    // 叠加当前云台独立的俯仰零点偏移，再转换为整数目标步数。
+    targets[1] = lroundf(tiltToSteps(degrees + TILT_ANGLE_OFFSET_DEGREES));
 
     // 重新提交包含三个轴当前目标值的目标数组。
     applyTargets();

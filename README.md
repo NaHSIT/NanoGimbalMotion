@@ -93,19 +93,54 @@ READY zero=0
 
 ## 机械换算参数
 
-当前固件参数位于 `src/panTiltMount.h`：
+当前固件的四组独立角度参数位于 `src/gimbalProfile.h`。通用版本保持现有参数，云台一、云台二、云台三初始参数与通用版相同：
 
 ```cpp
 #define SLIDER_PULLEY_TEETH 36.0f
 #define PAN_GEAR_RATIO 1.0f
 #define TILT_GEAR_RATIO 3.2f
+#define PAN_ANGLE_OFFSET_DEGREES 0.0f
+#define TILT_ANGLE_OFFSET_DEGREES 0.0f
 ```
 
 - 水平轴按当前机构校准为 1:1。
 - 俯仰轴参数与 ESP8266 固件中的角度预补偿配合使用。
 - 滑轨按照 36 齿同步轮和 2 mm 同步带齿距进行换算。
+- `PAN_ANGLE_OFFSET_DEGREES` 用于修正水平轴零点偏移角度。
+- `TILT_ANGLE_OFFSET_DEGREES` 用于修正俯仰轴零点偏移角度。
 
 更换电机、齿轮、同步轮、细分接线或机械结构后，需要重新校准这些参数。
+
+## 云台独立版本
+
+| 固件环境 | 用途 | 配置编号 |
+|---|---|---:|
+| `nanoatmega328` | 通用版本 | 0 |
+| `gimbal_1` | 云台一 | 1 |
+| `gimbal_2` | 云台二 | 2 |
+| `gimbal_3` | 云台三 | 3 |
+
+三个云台版本共用经过验证的电机和串口控制逻辑，仅角度比例与零点偏移参数相互独立。后续校准某个云台时，只修改 `src/gimbalProfile.h` 中对应编号的一组参数。
+
+当前校准状态：
+
+- 云台二已通过实测，水平和俯仰参数均与通用版本一致。
+- 云台三水平参数与通用版本一致。
+- 云台三实测俯仰指令 70° 时机械轴转动 90°，因此俯仰比例按 `3.2 × 70 ÷ 90` 修正为 `2.488889`。
+
+分别编译三个云台版本：
+
+```powershell
+pio run -e gimbal_1
+pio run -e gimbal_2
+pio run -e gimbal_3
+```
+
+例如，烧录云台一：
+
+```powershell
+pio run -e gimbal_1 -t upload --upload-port COM10
+```
 
 ## 软件零点
 
@@ -159,6 +194,7 @@ NanoGimbalMotion/
 ├─ platformio.ini
 ├─ README.md
 └─ src/
+   ├─ gimbalProfile.h
    ├─ main.cpp
    ├─ panTiltMount.h
    └─ panTiltMount.cpp
