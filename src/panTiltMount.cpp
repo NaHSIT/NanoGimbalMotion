@@ -34,6 +34,15 @@ int stepMode = SIXTEENTH_STEP;
 // 保存驱动器使能状态；true 表示当前驱动器已使能。
 bool driversEnabled = true;
 
+// 标记滑轨是否仍在执行最近一次绝对位置命令。
+bool sliderMotionPending = false;
+
+// 保存最近一次滑轨命令的目标毫米值。
+float sliderTargetMm = 0.0f;
+
+// 保存最近一次滑轨命令的目标 STEP 位置。
+long sliderTargetSteps = 0;
+
 // 标记当前是否已经收到一条文本命令的命令字符。
 bool textCommandPending = false;
 
@@ -80,6 +89,31 @@ float tiltToSteps(float degrees) {
 long sliderToSteps(float mm) {
     // 步进脉冲必须为整数，因此对计算结果进行四舍五入。
     return lroundf(mm * sliderStepsPerMm);
+}
+
+// 判断任一轴是否尚未到达当前软件目标。
+bool axesMoving() {
+    return pan.currentPosition() != targets[0] ||
+           tilt.currentPosition() != targets[1] ||
+           slider.currentPosition() != targets[2];
+}
+
+// 向 ESP8266 返回单行、可精确匹配的 Nano 通信健康状态。
+void printNanoHealth() {
+    Serial.print(F("NANO_OK v=2 en="));
+    Serial.print(driversEnabled ? 1 : 0);
+    Serial.print(F(" moving="));
+    Serial.print(axesMoving() ? 1 : 0);
+    Serial.print(F(" slider_steps="));
+    Serial.println(slider.currentPosition());
+}
+
+// 向 ESP8266 返回最近一次滑轨绝对位置命令的软件完成回执。
+void printSliderDone() {
+    Serial.print(F("SLIDER_DONE target_mm="));
+    Serial.print(sliderTargetMm, 2);
+    Serial.print(F(" pos_steps="));
+    Serial.println(slider.currentPosition());
 }
 
 // 向 ESP8266 输出当前驱动器状态及三轴软件位置。
@@ -183,11 +217,23 @@ void setTiltTarget(float degrees) {
 
 // 单独更新滑轨轴绝对毫米目标，不覆盖另外两个轴已有目标。
 void setSliderTarget(float mm) {
+    // 保存原始毫米目标，供运动完成回执使用。
+    sliderTargetMm = mm;
+
     // 将毫米位置转换为整数目标步数并写入 targets[2]。
-    targets[2] = sliderToSteps(mm);
+    sliderTargetSteps = sliderToSteps(mm);
+    targets[2] = sliderTargetSteps;
+
+    // 只有当前位置与目标不同时才等待主循环发送完成回执。
+    sliderMotionPending = slider.currentPosition() != sliderTargetSteps;
 
     // 重新提交包含三个轴当前目标值的目标数组。
     applyTargets();
+
+    // 重复发送当前位置时也必须立即返回对应命令的完成回执。
+    if (!sliderMotionPending) {
+        printSliderDone();
+    }
 }
 
 // 执行一条已经完整接收的文本命令。
@@ -245,6 +291,11 @@ void executeTextCommand(char command, const char* value) {
         case 'X':
             sliderMaxMmPerSecond = number;
             applyMaxSpeeds();
+            break;
+
+        // Q：返回单行 Nano 通信健康状态，供 ESP8266 自检精确匹配。
+        case 'Q':
+            printNanoHealth();
             break;
 
         // R：输出当前驱动器和三轴状态。
@@ -394,4 +445,13 @@ void mainLoop() {
 
     // 持续推进三个轴到各自绝对目标位置。
     coordinated.run();
+
+    // 滑轨首次达到最近目标时只发送一次软件运动完成回执。
+    if (
+        sliderMotionPending &&
+        slider.currentPosition() == sliderTargetSteps
+    ) {
+        sliderMotionPending = false;
+        printSliderDone();
+    }
 }
