@@ -115,6 +115,8 @@ READY zero=0
 
 本项目不是四个重复的工程文件夹，而是一个工程目录下的四个 PlatformIO 编译环境。四个版本共用 `src/main.cpp`、`src/panTiltMount.cpp` 和引脚定义；每个版本的差异集中在 `src/gimbalProfile.h` 对应的配置分支中。
 
+nanogreat 已经从本工程完全分离，独立工程位于 [nanogreat](</E:/课程/比赛/物联网/arduino nano/ardno/ardnoctr/nanogreat>)。Nano 主工程不会编译或包含 nanogreat 的开场动画代码；nanogreat 的编译、测试和烧录请进入独立目录执行。
+
 | 固件环境 | 用途 | 配置编号 |
 |---|---|---:|
 | `nanoatmega328` | 通用版本 | 0 |
