@@ -11,6 +11,7 @@
 #define GIMBAL_PROFILE_NAME "general"
 #define PAN_GEAR_RATIO 1.0f
 #define TILT_GEAR_RATIO 3.2f
+#define TILT_DIRECTION 1.0f
 #define PAN_ANGLE_OFFSET_DEGREES 0.0f
 #define TILT_ANGLE_OFFSET_DEGREES 0.0f
 
@@ -18,7 +19,9 @@
 #elif GIMBAL_PROFILE == 1
 #define GIMBAL_PROFILE_NAME "gimbal_1"
 #define PAN_GEAR_RATIO 1.0f
-#define TILT_GEAR_RATIO 3.2f
+// 实测指令 70° 时机械轴转动 90°，按 70/90 修正原俯仰比例 3.2。
+#define TILT_GEAR_RATIO 2.488889f
+#define TILT_DIRECTION 1.0f
 #define PAN_ANGLE_OFFSET_DEGREES 0.0f
 #define TILT_ANGLE_OFFSET_DEGREES 0.0f
 
@@ -26,7 +29,9 @@
 #elif GIMBAL_PROFILE == 2
 #define GIMBAL_PROFILE_NAME "gimbal_2"
 #define PAN_GEAR_RATIO 1.0f
-#define TILT_GEAR_RATIO 3.2f
+// 实测指令 70° 时机械轴转动 90°，按 70/90 修正原俯仰比例 3.2。
+#define TILT_GEAR_RATIO 2.488889f
+#define TILT_DIRECTION 1.0f
 #define PAN_ANGLE_OFFSET_DEGREES 0.0f
 #define TILT_ANGLE_OFFSET_DEGREES 0.0f
 
