@@ -41,6 +41,8 @@
 #define PAN_GEAR_RATIO 1.0f
 // 实测指令 70° 时机械轴转动 90°，按 70/90 修正原俯仰比例 3.2。
 #define TILT_GEAR_RATIO 2.488889f
+// 云台三俯仰电机的机械安装方向相反，仅反转本版本的俯仰角度方向。
+#define TILT_DIRECTION -1.0f
 #define PAN_ANGLE_OFFSET_DEGREES 0.0f
 #define TILT_ANGLE_OFFSET_DEGREES 0.0f
 

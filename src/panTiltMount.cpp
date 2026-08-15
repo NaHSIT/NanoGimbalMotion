@@ -81,8 +81,8 @@ float panToSteps(float degrees) {
 
 // 将俯仰轴角度转换为对应的 STEP 脉冲数。
 float tiltToSteps(float degrees) {
-    // 角度乘以每度脉冲数，保留浮点结果供速度和位置换算使用。
-    return degrees * tiltStepsPerDegree;
+    // 叠加当前云台独立的方向系数，再换算为 STEP 脉冲数。
+    return degrees * tiltStepsPerDegree * TILT_DIRECTION;
 }
 
 // 将滑轨毫米位置转换为整数 STEP 脉冲数。
