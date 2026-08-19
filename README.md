@@ -117,6 +117,21 @@ READY zero=0
 
 nanogreat 已经从本工程完全分离，独立工程位于 [nanogreat](</E:/课程/比赛/物联网/arduino nano/ardno/ardnoctr/nanogreat>)。Nano 主工程不会编译或包含 nanogreat 的开场动画代码；nanogreat 的编译、测试和烧录请进入独立目录执行。
 
+nanogreat 的三套实际启动动画固件位于独立工程下：[`gimbal_1_boot`](nanogreat/gimbal_1_boot)、[`gimbal_2_boot`](nanogreat/gimbal_2_boot)、[`gimbal_3_boot`](nanogreat/gimbal_3_boot)。它们分别对应左、中、右三个云台，上电后自动启动联动轨迹，不等待 ESP8266 发送 `B`；ESP8266 就绪后发送 `F,<pan>,<tilt>`，动画从当前姿态平滑收尾。启动动画不驱动滑轨。
+
+三套动画固件的安全角度统一为 Pan ±30°、Tilt -30°～+45°，其中 +45° 是后向俯仰硬上限，开场关键帧最高 40°。烧录时必须进入对应子目录，使用正式环境，不要烧录 `_test` 环境；完整说明见 [`nanogreat/README.md`](nanogreat/README.md)。
+
+```powershell
+cd nanogreat/gimbal_1_boot
+pio run -e gimbal_1_boot -t upload --upload-port COM10
+
+cd ../gimbal_2_boot
+pio run -e gimbal_2_boot -t upload --upload-port COM10
+
+cd ../gimbal_3_boot
+pio run -e gimbal_3_boot -t upload --upload-port COM10
+```
+
 | 固件环境 | 用途 | 配置编号 |
 |---|---|---:|
 | `nanoatmega328` | 通用版本 | 0 |
